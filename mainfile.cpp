@@ -58,7 +58,7 @@ class big_real
                 s.erase(s.length() - 1);
             }
             comma += (s.length() - 1 - s.find('.'));
-            s.erase(s.find('.'), 1);
+            s.erase(s.find('.'), 1);//?
         }
 
         int ind = 0;
@@ -68,6 +68,11 @@ class big_real
         for(int i = s.length() - 1; i >= 0; --i){
             digits[ind] = (s[i] - '0');
             ++ind;
+        }
+        big_real Zero;
+        is_negative = !is_negative;
+        if(*this != Zero){
+            is_negative = !is_negative;
         }
     }
 
@@ -79,11 +84,13 @@ class big_real
             curr2.is_negative = !curr2.is_negative;
             return curr1 - curr2;
         }
+        //?
         else if(curr1.is_negative){
             curr1.is_negative = !curr1.is_negative;
             return curr2 - curr1;
         }
         else{
+            //?
             if(curr1.comma < curr2.comma){
                 swap(curr1, curr2);
             }
@@ -94,7 +101,7 @@ class big_real
                     curr1.digits[i] += curr2.digits[i - comma_diff];
                     if(curr1.digits[i - 1] > 9){
                         curr1.digits[i - 1] -= 10;
-                        ++curr1.digits[i];
+                        ++curr1.digits[i];//?
                     }
                 }
             }
@@ -102,24 +109,24 @@ class big_real
             return curr1;
     }
 
-    bool operator==(const big_real& other){
-        if(is_negative != other.is_negative || comma != other.comma){
+    bool operator==(const big_real& other){//?
+        if(is_negative != other.is_negative || comma != other.comma){ //?
             return false;
         }
         for(int i = 0; i < SIZE; ++i){
             if(digits[i] != other.digits[i]){
-                return false;
+                return false;//?
             }
         }
         return true;
     }
-    bool operator!=(const big_real& other){
-        if(is_negative != other.is_negative || comma != other.comma){
+    bool operator!=(const big_real& other){//?
+        if(is_negative != other.is_negative || comma != other.comma){ //?
             return true;
         }
         for(int i = 0; i < SIZE; ++i){
             if(digits[i] != other.digits[i]){
-                return true;
+                return true;//?
             }
         }
         return false;
@@ -129,6 +136,7 @@ class big_real
         if(other.is_negative && !is_negative){
             return true;
         }
+        //?
         else if(!other.is_negative && is_negative){
             return false;
         }
@@ -136,7 +144,7 @@ class big_real
         for(int i = 0; i < SIZE; ++i){
             if(digits[i + comma] != other.digits[i + other.comma]){
                 if(digits[i + comma] > other.digits[i + other.comma]){
-                    return !is_negative;
+                    return !is_negative;//?
                 }
                 else{
                     return is_negative;
@@ -145,11 +153,11 @@ class big_real
         }
         if(comma > other.comma){
             return true;
-        }
+        }//?
         else{
             for(int i = 0; i < comma; ++i){
                 if(digits[i] > other.digits[i]){
-                    return !is_negative;
+                    return !is_negative;//?
                 }
                 else{
                     return is_negative;
@@ -158,6 +166,7 @@ class big_real
         }
         return false;
     }
+    //mark
     bool operator<(const big_real& other){
         return !(*this == other || *this > other);
     }
@@ -169,15 +178,28 @@ class big_real
             curr2.is_negative = !curr2.is_negative;
             return curr1 + curr2;
         }
+        //?
         else if(curr1.is_negative){
             curr1.is_negative = !curr1.is_negative;
-            big_real curr3 = curr1 + curr2;
+            big_real curr3 = curr1 + curr2;//?
             curr3.is_negative = 1;
+
+            big_real Zero;//
+            curr3.is_negative = !curr3.is_negative;
+            if(curr3 != Zero){
+                curr3.is_negative = !curr3.is_negative;
+            }
             return curr3;
         }
         else if(curr1 < curr2){
-            big_real curr3 = curr2 - curr1;
+            big_real curr3 = curr2 - curr1;//?
             curr3.is_negative = 1;
+            
+            big_real Zero;//
+            curr3.is_negative = !curr3.is_negative;
+            if(curr3 != Zero){
+                curr3.is_negative = !curr3.is_negative;
+            }
             return curr3;
         }
         else{
@@ -191,7 +213,7 @@ class big_real
                     curr1.digits[i] -= curr2.digits[i - comma_diff];
                     if(curr1.digits[i - 1] < 0){
                         curr1.digits[i - 1] += 10;
-                        --curr1.digits[i];
+                        --curr1.digits[i];//?
                     }
                 }
                 curr1.remove_extra0r();
@@ -211,7 +233,7 @@ class big_real
                     ++i;
                 }
                 for(; i < SIZE; ++i){
-                    curr3.digits[i] = curr1.digits[i - comma_diff] - curr1.digits[i];
+                    curr3.digits[i] = curr1.digits[i + comma_diff] - curr2.digits[i];
                     if(curr3.digits[i - 1] < 0){
                         curr3.digits[i - 1] += 10;
                         --curr3.digits[i];
@@ -224,8 +246,54 @@ class big_real
         }
     }
 
+    /*big_real operator*(const big_real& other) {//?
+        {//?
+            big_real Zero;//?
+            if(Zero == other || *this == Zero){//?
+                return Zero;//?
+            }
+        }
 
-    //Additional functions
+    	big_real curr1(*this);
+        big_real curr2(other);//
+        if(curr1.is_negative + curr2.is_negative == 1){//?
+            curr1.is_negative = 0;
+            curr2.is_negative = 0;
+            big_real curr3 = curr1 * curr2;
+            curr3.is_negative = 1;
+            return curr3;
+        }
+        //?
+        else{
+            curr1.is_negative = 0;
+            curr2.is_negative = 0;
+            //?
+            int curr1_k = 0;
+            int curr2_k = 0;
+            for(int i = 0; i < SIZE; ++i){
+                if(curr1.digits[i]){
+                    curr1_k = i + 1;
+                }
+                if(curr2.digits[i]){
+                    curr2_k = i + 1;
+                }
+            }
+            if(curr2_k > curr1_k){
+                swap(curr1, curr2);//
+            }
+            if(curr2_k > 1)
+
+            for(int i = 0; i < SIZE; ++i){
+                
+            }
+            curr1.remove_extra0r();
+            return curr1;
+        }
+    }*/
+
+    /////////////////////////////
+
+    //Additional functions //?
     void remove_extra0r(){
         int k_extra0 = 0;
         for(int i = 0; i < SIZE && comma > 0; ++i){
