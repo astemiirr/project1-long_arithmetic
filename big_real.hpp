@@ -1,113 +1,41 @@
-// big_real.hpp
-#pragma once
+//big_real.hpp
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
+#include <sstream>
+#include <iomanip>
 
-using namespace std;
+class big_real {
+	const int DivDigits = 1000;
 
-class big_real
-{
-private:
-    int SIZE = 100;
+	int sign;
+	std::vector<int> digits;
+	int dot;
+
+	void remove_extra_zeroes();
+	void normalize();
+	std::string tostring();
 
 public:
-    std::vector<int> vec;
-    int digits[SIZE];
-    int comma;
-    bool is_negative;
+	big_real();
+	big_real(const big_real& other);
+	big_real(double value);
+	big_real(const std::string& s_inp);
 
-    big_real(){
-        for (int i = 0; i < SIZE; ++i)
-        {
-            digits[i] = 0;
-        }
-        comma = 0;
-        is_negative = 0;
-    }
+	big_real& operator=(const big_real& other);
+	big_real operator-() const;
 
-    big_real(const big_real &other){
-        for (int i = 0; i < SIZE; ++i)
-        {
-            digits[i] = other.digits[i];
-        }
-        comma = other.comma;
-        is_negative = other.is_negative;
-    }
+	bool operator==(const big_real& other) const;
+	bool operator!=(const big_real& other) const;
+	bool operator>(const big_real& other) const;
+	bool operator<(const big_real& other) const;
 
-    /*explicit */ big_real(string s){
-        for (int i = 0; i < SIZE; ++i)
-        {
-            digits[i] = 0;
-        }
-        comma = 0;
-        is_negative = 0;
-        if (s[0] == '-')
-        {
-            is_negative = 1;
-            s.erase(0, 1);
-        }
-        while (!(isdigit(s[s.length() - 1]) || s[s.length() - 1] == '.'))
-        {
-            s.erase(s.length() - 1);
-        }
-        if (s.find('e') != string::npos || s.find('E') != string::npos)
-        {
-            if (s.find('e') != string::npos)
-            {
-                comma -= stoi(s.substr(s.find('e')));
-                s.erase(s.find('e'));
-            }
-            else
-            {
-                comma -= stoi(s.substr(s.find('E')));
-                s.erase(s.find('E'));
-            }
-        }
-        if (s.find('.') != string::npos)
-        {
-            while (s[s.length()] == '0')
-            {
-                s.erase(s.length() - 1);
-            }
-            comma += (s.length() - 1 - s.find('.'));
-            s.erase(s.find('.'), 1); //?
-        }
+	big_real operator+(const big_real& other) const;
+	big_real operator-(const big_real& other) const;
+	big_real operator*(const big_real& other) const;
+	big_real operator/(const big_real& other) const;
 
-        int ind = 0;
-        if (comma < 0)
-        {
-            ind = abs(comma);
-        }
-        for (int i = s.length() - 1; i >= 0; --i)
-        {
-            digits[ind] = (s[i] - '0');
-            ++ind;
-        }
-        big_real Zero;
-        is_negative = !is_negative;
-        if (*this != Zero)
-        {
-            is_negative = !is_negative;
-        }
-    }
+	big_real inverse() const;
 
-    big_real operator+(const big_real &other);
-
-    big_real operator-(const big_real &other);
-
-    // big_real operator*(const big_real& other);
-
-    bool operator==(const big_real &other) /*const*/;
-
-    bool operator!=(const big_real &other);
-
-    bool operator>(const big_real &other);
-
-    bool operator<(const big_real &other);
-
-    // Additional functions
-    void remove_extra_zeroes();
-
-    void print();
+	bool isZero() const;
 };
