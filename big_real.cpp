@@ -1,7 +1,7 @@
 //big_real.cpp
 #include "big_real.hpp"
 
-using namespace std;
+namespace mynamespace{
 
 void big_real::removeZeroes() {
 	// удаление нулей справа
@@ -12,42 +12,65 @@ void big_real::removeZeroes() {
     // удаление нулей слева
     while (digits[0] == 0 && digits.size() > 1) {
         digits.erase(digits.begin());
-        --exponent;
+        --dot;
     }
 
 	if (isZero()) {
-		exponent = 1;
+		dot = 1;
 		sign = 1;
 	}
 
 	//norm...;
 }
 
+void big_real::truncing() {
+	if (dot <=0) {
+		*this = big_real("0");
+	}
+	else if(dot < digits.size()) {
+		digits.erase(digits.begin() + dot, digits.end());
+	}
+	//removeZeroes();
+}
+
+void big_real::end_cut(const int value) {
+	int k = value;
+	while(digits.size() > 1 && k > 0) {
+		digits.pop_back();
+		--dot;
+		--k;
+	}
+}
+
+void big_real::spec_movement() {
+	dot = 1;
+}
+
 big_real::big_real() {
 	sign = 1;
-	digits = vector<int>(1, 0);
-	exponent = 1;
+	digits = std::vector<int> (1, 0);
+	dot = 1;
 }
 
 big_real::big_real(const big_real& other) {
 	sign = other.sign;
-	exponent = other.exponent;
-	digits = vector<int>(other.digits);
+	dot = other.dot;
+	digits = std::vector<int> (other.digits);
 }
 
 big_real::big_real(double value) {
-	stringstream ss;
-	ss << setprecision(15) << value;
+	std::stringstream ss;
+	ss << std::setprecision(15) << value;
 
-	string s_inp = ss.str();
+	std::string s_inp = ss.str();
 	*this = big_real(s_inp);
 }
 
-big_real::big_real(const string& s_inp) {
-	string s = s_inp;
+big_real::big_real(const std::string& s_inp) {
+	std::string s = s_inp;
 
     sign = 1;
-    exponent = 0;
+    dot = 0;
     if (s[0] == '-') {
         sign = -1;
         s.erase(0, 1);
@@ -57,21 +80,21 @@ big_real::big_real(const string& s_inp) {
         s.erase(s.length() - 1);
     }
 
-    if (s.find('e') != string::npos) {
-        exponent += stoi(s.substr(s.find('e')));
+    if (s.find('e') != std::string::npos) {
+        dot += stoi(s.substr(s.find('e')));
         s.erase(s.find('e'));
     }
-    else if(s.find('E') != string::npos) {
-        exponent += stoi(s.substr(s.find('E')));
+    else if(s.find('E') != std::string::npos) {
+        dot += stoi(s.substr(s.find('E')));
         s.erase(s.find('E'));
     }
 
-    if (s.find('.') != string::npos) {
-        exponent += (s.find('.'));
+    if (s.find('.') != std::string::npos) {
+        dot += (s.find('.'));
         s.erase(s.find('.'), 1);
     }
     else {
-        exponent += s.length();
+        dot += s.length();
     }
 
     for (int i = 0; i < s.length(); ++i) {
@@ -87,14 +110,14 @@ big_real& big_real::operator=(const big_real& other) {
 	}
 
 	sign = other.sign;
-	exponent = other.exponent;
-	digits = vector<int>(other.digits);
+	dot = other.dot;
+	digits = std::vector<int>(other.digits);
 
 	return *this;
 }
 
 bool big_real::operator==(const big_real& other) const {
-	if (sign != other.sign || exponent != other.exponent || digits.size() != other.digits.size()) {
+	if (sign != other.sign || dot != other.dot || digits.size() != other.digits.size()) {
         return false;
     }
     for (int i = 0; i < digits.size(); ++i) {
@@ -115,8 +138,8 @@ bool big_real::operator>(const big_real& other) const {
 		return sign > other.sign;
 	}
 
-	if (exponent != other.exponent) {
-		return (exponent > other.exponent) ^ (sign == -1);
+	if (dot != other.dot) {
+		return (dot > other.dot) ^ (sign == -1);
 	}
 
 	for (int i = 0; i < digits.size(); ++i) {
@@ -162,24 +185,24 @@ big_real big_real::operator-() const {
 
 big_real big_real::operator+(const big_real& other) const {
 	if (sign == other.sign) {
-		int exp1 = exponent;
-		int exp2 = other.exponent;
+		int exp1 = dot;
+		int exp2 = other.dot;
 
-		vector <int> v1(digits);
-		vector <int> v2(other.digits);
+		std::vector <int> v1(digits);
+		std::vector <int> v2(other.digits);
 
-		while (exp1 != max(exp1, exp2) || exp2 != max(exp1, exp2)) {
-			if (exp1 != max(exp1, exp2)) {
+		while (exp1 != std::max(exp1, exp2) || exp2 != std::max(exp1, exp2)) {
+			if (exp1 != std::max(exp1, exp2)) {
 				v1.insert(v1.begin(), 0);
 				++exp1;
 			}
-			if (exp2 != max(exp1, exp2)) {
+			if (exp2 != std::max(exp1, exp2)) {
 				v2.insert(v2.begin(), 0);
 				exp2++;
 			}
 		}
 
-		int size = max(v1.size(), v2.size());
+		int size = std::max(v1.size(), v2.size());
 
 		while (v1.size() != size) {
 			v1.push_back(0);
@@ -192,7 +215,7 @@ big_real big_real::operator+(const big_real& other) const {
 		big_real res;
 
 		res.sign = sign;
-		res.digits = vector<int> (size + 1, 0);
+		res.digits = std::vector<int> (size + 1, 0);
 
 		for (int i = 0; i < size; ++i) {
 			res.digits[i + 1] = v1[i] + v2[i];
@@ -203,7 +226,7 @@ big_real big_real::operator+(const big_real& other) const {
 			res.digits[i] %= 10;
 		}
 
-		res.exponent = max(exp1, exp2) + 1;
+		res.dot = std::max(exp1, exp2) + 1;
 		res.removeZeroes();
 
 		return res;
@@ -218,22 +241,22 @@ big_real big_real::operator+(const big_real& other) const {
 
 big_real big_real::operator-(const big_real& other) const {
 	if (sign == 1 && other.sign == 1) {
-		int exp1 = *this > other ? exponent : other.exponent;
-		int exp2 = *this > other ? other.exponent : exponent;
+		int exp1 = *this > other ? dot : other.dot;
+		int exp2 = *this > other ? other.dot : dot;
 
-		vector <int> v1(*this > other ? digits : other.digits);
-		vector <int> v2(*this > other ? other.digits : digits);
+		std::vector <int> v1(*this > other ? digits : other.digits);
+		std::vector <int> v2(*this > other ? other.digits : digits);
 
-		while (exp1 != max(exp1, exp2)) {
+		while (exp1 != std::max(exp1, exp2)) {
 			v1.insert(v1.begin(), 0);
 			++exp1;
 		}
-		while (exp2 != max(exp1, exp2)) {
+		while (exp2 != std::max(exp1, exp2)) {
 			v2.insert(v2.begin(), 0);
 			++exp2;
 		}
 
-		int size = max(v1.size(), v2.size());
+		int size = std::max(v1.size(), v2.size());
 
 		while (v1.size() != size) {
 			v1.push_back(0);
@@ -246,7 +269,7 @@ big_real big_real::operator-(const big_real& other) const {
 		big_real res;
 
 		res.sign = *this > other ? 1 : -1;
-		res.digits = vector<int> (size + 1, 0);
+		res.digits = std::vector<int> (size + 1, 0);
 
 		for (int i = 0; i < size; ++i) {
 			res.digits[i + 1] = v1[i] - v2[i];
@@ -259,7 +282,7 @@ big_real big_real::operator-(const big_real& other) const {
 			}
 		}
 
-		res.exponent = max(exp1, exp2) + 1;
+		res.dot = std::max(exp1, exp2) + 1;
 		res.removeZeroes();
 
 		return res;
@@ -277,8 +300,8 @@ big_real big_real::operator*(const big_real& other) const {
 	big_real res;
 
 	res.sign = sign * other.sign;
-	res.digits = vector<int> (len, 0);
-	res.exponent = exponent + other.exponent;
+	res.digits = std::vector<int> (len, 0);
+	res.dot = dot + other.dot;
 
 	for (int i = 0; i < digits.size(); ++i) {
 		for (int j = 0; j < other.digits.size(); ++j) {
@@ -299,14 +322,14 @@ big_real big_real::operator*(const big_real& other) const {
 big_real big_real::operator/(const big_real& other) const {
 	big_real res = *this * other.inverse();
 
-	int before_dot = max(0, exponent);
+	int before_dot = std::max(0, dot);
 
 	if (before_dot > res.digits.size() - 1) {
 		return res;
 	}
 
 	int i = res.digits.size() - 1 - before_dot;
-	int n = max(0, res.exponent);
+	int n = std::max(0, res.dot);
 
 	if (i > n && res.digits[i] == 9) {
 		while (i > n && res.digits[i] == 9) {
@@ -315,13 +338,67 @@ big_real big_real::operator/(const big_real& other) const {
 
 		if (res.digits[i] == 9) {
 			res.digits.erase(res.digits.begin() + n, res.digits.end());
-			res = res + res.sign;
+			res = res + big_real(res.sign);
 		}
 		else {
 			res.digits.erase(res.digits.begin() + i + 1, res.digits.end());
 			++res.digits[i];
 		}
 	}
+
+	return res;
+}
+
+big_real big_real::sqrt() const {
+	if (sign == -1) {
+		throw std::string("big_real big_real::sqrt() - value is negative!");
+	}
+
+	if (isZero()) {
+		return big_real("0");
+	}
+
+	big_real x0;
+	big_real p("0.5");
+	big_real res("0.5");
+	big_real eps;
+	eps.digits = std::vector<int> (1, 1);
+	eps.dot = 1 - sqrtDigits;
+
+	do {
+		x0 = res;
+		res = p * (x0 + *this / x0);
+	} while ((x0 - res).abs() > eps);
+
+	res.digits.erase(res.digits.begin() + std::max(0, res.dot) + sqrtDigits, res.digits.end());
+	res.removeZeroes();
+
+	return res;
+}
+
+big_real big_real::pow(const big_real& p) const{
+	if (!p.isInteger()) {
+		throw std::string("big_real big_real::pow(const big_real& p) - p is not integer!");
+	}
+
+	big_real res("1");
+	big_real a = p.sign == 1 ? *this : this->inverse();
+	big_real power = p.abs();
+
+	while (power > big_real("0")) {
+		if (power.isOdd()) {
+			res *= a;
+		}
+
+		a *= a;
+		power /= big_real("2");
+
+		if (!power.isInteger()) {
+			power.digits.erase(power.digits.end() - 1);
+		}
+	}
+
+	res.removeZeroes();
 
 	return res;
 }
@@ -343,16 +420,16 @@ big_real& big_real::operator/=(const big_real& other) {
 }
 
 big_real& big_real::operator++() {
-	return (*this = *this + 1);
+	return (*this = *this + big_real("1"));
 }
 
 big_real& big_real::operator--() {
-	return (*this = *this - 1);
+	return (*this = *this - big_real("1"));
 }
 
 big_real big_real::inverse() const {
 	if (isZero()) {
-		throw string("big_real big_real::inverse() - You can't divide by zero!");
+		throw std::string("big_real big_real::inverse() - You can't divide by zero!");
 	}
 
 	big_real other(*this);
@@ -362,22 +439,22 @@ big_real big_real::inverse() const {
 
 	big_real res;
 	res.sign = sign;
-	res.exponent = 1;
-	res.digits = vector<int> ();
+	res.dot = 1;
+	res.digits = std::vector<int> ();
 
-	while (other < 1) {
-		++other.exponent;
-		++res.exponent;
+	while (other < big_real("1")) {
+		++other.dot;
+		++res.dot;
 	}
 
 	while (t < other) {
-		++t.exponent;
+		++t.dot;
 	}
 	
-	res.exponent -= t.exponent - 1;
+	res.dot -= t.dot - 1;
 
 	int numbers = 0;
-	int before_dot = max(0, res.exponent);
+	int before_dot = std::max(0, res.dot);
 	int maxNumbers = divDigits/* + before_dot*/;
 
 	do {
@@ -388,7 +465,7 @@ big_real big_real::inverse() const {
 			t -= other;
 		}
 
-		++t.exponent;
+		++t.dot;
 		t.removeZeroes();
 
 		res.digits.push_back(div);
@@ -398,14 +475,21 @@ big_real big_real::inverse() const {
 	return res;
 }
 
-string big_real::tostring() const{
-	string s_out = "";
+big_real big_real::abs() const {
+	big_real res(*this);
+	res.sign = 1;
+
+	return res;
+}
+
+std::string big_real::tostring() const{
+	std::string s_out = "";
 
 	if(sign == -1) {
 		s_out += "-";
 	}
 
-	int k = exponent;
+	int k = dot;
 	if(k <= 0) {
 		s_out += "0.";
 		while(k < 0){
@@ -414,42 +498,55 @@ string big_real::tostring() const{
 		}
 	}
 	
-	s_out += to_string(digits[0]);
+	s_out += std::to_string(digits[0]);
 	for(int i = 1; i < digits.size(); ++i) {
-		if(exponent == i) {
+		if(dot == i) {
 			s_out += ".";
 		}
-		s_out += to_string(digits[i]);
+		s_out += std::to_string(digits[i]);
 	}
 
 	return s_out;
-}
-
-int big_real::fractional_size() const{
-	return digits.size();
-}
-
-void big_real::pi_cut(int value) {
-	if(digits.size() > value + 1) {
-		digits.erase(digits.begin() + value + 1, digits.end());
-	}
 }
 
 bool big_real::isZero() const {
 	return digits.size() == 1 && digits[0] == 0;
 }
 
-ostream& operator<<(ostream& outs, const big_real& value) {
+bool big_real::isInteger() const {
+	if (dot < 0) {
+		return false;
+	}
+	else if(digits.size() <= dot) {
+		return true;
+	}
+
+	return false;
+}
+
+bool big_real::isOdd() const {
+	if (!isInteger()) {
+		return false;
+	}
+
+	if (digits.size() == dot) {
+		return digits[digits.size() - 1] % 2 == 1;
+	}
+
+	return false;
+}
+
+std::ostream& operator<<(std::ostream& outs, const big_real& value) {
 	if (value.sign == -1) {
 		outs << '-';
 	}
 
-	if (value.exponent > 0) {
+	if (value.dot > 0) {
 		int i = 0;
-		int e = value.exponent;
+		int e = value.dot;
 
 		while(i < value.digits.size() && i < e) {
-			outs << value.digits[++i];
+			outs << value.digits[i++];
 		}
 
 		while (i < e) {
@@ -461,20 +558,21 @@ ostream& operator<<(ostream& outs, const big_real& value) {
 			outs << ".";
 
 			while(i < value.digits.size()) {
-				outs << value.digits[++i];
+				outs << value.digits[i++];
 			}
 		}
 	}
-	else if (value.exponent == 0) {
+	else if (value.dot == 0) {
 		outs << "0.";
 
-		for (int i = 0; i < value.digits.size(); ++i)
+		for (int i = 0; i < value.digits.size(); ++i) {
 			outs << value.digits[i];
+		}
 	}
 	else {
 		outs << "0.";
 
-		for (int i = 0; i < -value.exponent; ++i) {
+		for (int i = 0; i < -value.dot; ++i) {
 			outs << "0";
 		}
 
@@ -484,4 +582,6 @@ ostream& operator<<(ostream& outs, const big_real& value) {
 	}
 
 	return outs;
+}
+
 }
